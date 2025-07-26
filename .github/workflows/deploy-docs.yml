@@ -1,0 +1,35 @@
+name: Deploy Documentation
+
+on:
+  push:
+    tags: [ 'v*' ]
+  release:
+    types: [published, created]
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.8'
+        channel: 'stable'
+      
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Generate documentation
+      run: dart doc --output=doc
+      
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.RELEASE_TOKEN }}
+        publish_dir: ./doc
+        publish_branch: gh-pages
+        destination_dir: .
+        keep_files: false
+        enable_jekyll: false

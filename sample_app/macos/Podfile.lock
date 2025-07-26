@@ -1,0 +1,29 @@
+PODS:
+  - FlutterMacOS (1.0.0)
+  - trustpin_sdk (1.0.0):
+    - FlutterMacOS
+    - TrustPinKit (= 1.0.0)
+  - TrustPinKit (1.0.0)
+
+DEPENDENCIES:
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - trustpin_sdk (from `Flutter/ephemeral/.symlinks/plugins/trustpin_sdk/macos`)
+
+SPEC REPOS:
+  trunk:
+    - TrustPinKit
+
+EXTERNAL SOURCES:
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  trustpin_sdk:
+    :path: Flutter/ephemeral/.symlinks/plugins/trustpin_sdk/macos
+
+SPEC CHECKSUMS:
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  trustpin_sdk: d63103279b9ad56f41155be2ffc4209e7588d93b
+  TrustPinKit: 65dab1d52fcb92065c3abfa5f22600e56c746639
+
+PODFILE CHECKSUM: 89c84cf5c2351c1e554c6dea18d31a879fc3a19e
+
+COCOAPODS: 1.16.2

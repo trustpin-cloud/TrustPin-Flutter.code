@@ -1,0 +1,33 @@
+name: trustpin_sdk
+description: A Flutter plugin for TrustPin SSL certificate pinning SDK that provides enhanced security for network connections by validating SSL certificates against configured pins.
+version: 1.0.0
+homepage: https://github.com/trustpin-cloud/TrustPin-Flutter.code
+repository: https://github.com/trustpin-cloud/TrustPin-Flutter.code
+issue_tracker: https://github.com/trustpin-cloud/TrustPin-Flutter.code/issues
+documentation: https://trustpin-cloud.github.io/TrustPin-Flutter.code/
+
+environment:
+  sdk: '>=3.8.1 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+  http: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: cloud.trustpin.flutter.sdk
+        pluginClass: TrustPinSDKPlugin
+      ios:
+        pluginClass: TrustPinSDKPlugin
+      macos:
+        pluginClass: TrustPinSDKPlugin
