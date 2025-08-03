@@ -74,9 +74,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Future&lt;void&gt; setLogLevel(String logLevel) async {
-  await methodChannel.invokeMethod(&#39;setLogLevel&#39;, {
-    &#39;logLevel&#39;: logLevel,
-  });
+  await methodChannel.invokeMethod(&#39;setLogLevel&#39;, {&#39;logLevel&#39;: logLevel});
 }</code></pre>
 </section>
 
@@ -105,7 +103,7 @@ Future&lt;void&gt; setLogLevel(String logLevel) async {
 <footer>
   <span class="no-break">
     trustpin_sdk
-      0.0.2
+      0.1.0
   </span>
   
 </footer>
