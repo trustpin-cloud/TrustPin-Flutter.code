@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the MethodChannelTrustPinSDK class from the trustpin_sdk_method_channel library, for the Dart programming language.">
-  <title>MethodChannelTrustPinSDK class - trustpin_sdk_method_channel library - Dart API</title>
+  <meta name="description" content="API docs for the TrustPinDioInterceptor class from the dio_interceptor library, for the Dart programming language.">
+  <title>TrustPinDioInterceptor class - dio_interceptor library - Dart API</title>
 
 
   
@@ -25,10 +25,10 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">trustpin_sdk</a></li>
-    <li><a href="../trustpin_sdk_method_channel/">trustpin_sdk_method_channel.dart</a></li>
-    <li class="self-crumb">MethodChannelTrustPinSDK class</li>
+    <li><a href="../http_interceptors_dio_interceptor/">http_interceptors&#47;dio_interceptor.dart</a></li>
+    <li class="self-crumb">TrustPinDioInterceptor class</li>
   </ol>
-  <div class="self-name">MethodChannelTrustPinSDK</div>
+  <div class="self-name">TrustPinDioInterceptor</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,16 +45,39 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="trustpin_sdk_method_channel&#47;trustpin_sdk_method_channel-library-sidebar.html"
-    data-below-sidebar="trustpin_sdk_method_channel&#47;MethodChannelTrustPinSDK-class-sidebar.html">
+    data-above-sidebar="http_interceptors_dio_interceptor&#47;http_interceptors_dio_interceptor-library-sidebar.html"
+    data-below-sidebar="http_interceptors_dio_interceptor&#47;TrustPinDioInterceptor-class-sidebar.html">
     <div>
-<h1><span class="kind-class">MethodChannelTrustPinSDK</span> class 
+<h1><span class="kind-class">TrustPinDioInterceptor</span> class 
  
 </h1></div>
 
     
 <section class="desc markdown">
-  <p>An implementation of <a href="../trustpin_sdk_platform_interface/TrustPinSDKPlatform-class.html">TrustPinSDKPlatform</a> that uses method channels.</p>
+  <p>A certificate pinning interceptor for the Dio HTTP client.</p>
+<p>This interceptor adds TrustPin certificate validation to all HTTPS requests
+made through Dio. It validates certificates in two phases:</p>
+<ol>
+<li>Standard TLS validation (handled by the OS)</li>
+<li>TrustPin certificate pinning validation</li>
+</ol>
+<p>Certificates are cached to avoid repeated socket connections to the same
+host. The cache stores certificates but not validation results, so TrustPin
+verification is performed on every request.</p>
+<h2 id="usage">Usage</h2>
+<pre class="language-dart"><code class="language-dart">final dio = Dio();
+dio.interceptors.add(TrustPinDioInterceptor());
+
+// Now all HTTPS requests will have certificate pinning
+final response = await dio.get('https://api.example.com/data');
+</code></pre>
+<h2 id="important-notes">Important Notes</h2>
+<ul>
+<li>TrustPin must be initialized with <a href="../trustpin_sdk/TrustPin/setup.html">TrustPin.setup</a> before using this interceptor</li>
+<li>Only HTTPS requests are validated; HTTP requests pass through unchanged</li>
+<li>Certificate validation happens before the actual HTTP request is sent</li>
+<li>Failed validation prevents the request from being sent</li>
+</ul>
 </section>
 
 
@@ -65,9 +88,8 @@
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="https://pub.dev/documentation/plugin_platform_interface/2.1.8/plugin_platform_interface/PlatformInterface-class.html">PlatformInterface</a></li>
-        <li><a href="../trustpin_sdk_platform_interface/TrustPinSDKPlatform-class.html">TrustPinSDKPlatform</a></li>
-      <li>MethodChannelTrustPinSDK</li>
+        <li><a href="https://pub.dev/documentation/dio/5.9.0/dio/Interceptor-class.html">Interceptor</a></li>
+      <li>TrustPinDioInterceptor</li>
     </ul>
   </dd>
 
@@ -86,17 +108,17 @@
   <section class="summary offset-anchor" id="constructors">
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
-        <dt id="MethodChannelTrustPinSDK.new" class="callable">
-          <span class="name"><a href="../trustpin_sdk_method_channel/MethodChannelTrustPinSDK/MethodChannelTrustPinSDK.html">MethodChannelTrustPinSDK.new</a></span><span class="signature">()</span>
+        <dt id="TrustPinDioInterceptor.new" class="callable">
+          <span class="name"><a href="../http_interceptors_dio_interceptor/TrustPinDioInterceptor/TrustPinDioInterceptor.html">TrustPinDioInterceptor.new</a></span><span class="signature">()</span>
         </dt>
         <dd>
-          
+          Creates a new TrustPinDioInterceptor.
         </dd>
     </dl>
   </section>
     
   <section
-      class="summary offset-anchor"
+      class="summary offset-anchor inherited"
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
@@ -109,18 +131,6 @@
 <dd class="inherited">
   The hash code for this object.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="methodChannel" class="property">
-  <span class="name"><a href="../trustpin_sdk_method_channel/MethodChannelTrustPinSDK/methodChannel.html">methodChannel</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/services/MethodChannel-class.html">MethodChannel</a></span>
-  
-
-</dt>
-<dd>
-  The method channel used to interact with the native platform.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
@@ -145,6 +155,19 @@
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
+        <dt id="clearCertificateCache" class="callable">
+  <span class="name"><a href="../http_interceptors_dio_interceptor/TrustPinDioInterceptor/clearCertificateCache.html">clearCertificateCache</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Clears the certificate cache.
+  
+
+</dd>
+
         <dt id="noSuchMethod" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
     <span class="returntype parameter">&#8594; dynamic</span>
@@ -158,29 +181,42 @@
 
 </dd>
 
-        <dt id="setLogLevel" class="callable">
-  <span class="name"><a href="../trustpin_sdk_method_channel/MethodChannelTrustPinSDK/setLogLevel.html">setLogLevel</a></span><span class="signature">(<wbr><span class="parameter" id="setLogLevel-param-logLevel"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">logLevel</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+        <dt id="onError" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/dio/5.9.0/dio/Interceptor/onError.html">onError</a></span><span class="signature">(<wbr><span class="parameter" id="onError-param-err"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/DioException-class.html">DioException</a></span> <span class="parameter-name">err</span>, </span><span class="parameter" id="onError-param-handler"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/ErrorInterceptorHandler-class.html">ErrorInterceptorHandler</a></span> <span class="parameter-name">handler</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Called when an exception was occurred during the request.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="onRequest" class="callable">
+  <span class="name"><a href="../http_interceptors_dio_interceptor/TrustPinDioInterceptor/onRequest.html">onRequest</a></span><span class="signature">(<wbr><span class="parameter" id="onRequest-param-options"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/RequestOptions-class.html">RequestOptions</a></span> <span class="parameter-name">options</span>, </span><span class="parameter" id="onRequest-param-handler"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/RequestInterceptorHandler-class.html">RequestInterceptorHandler</a></span> <span class="parameter-name">handler</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
   </span>
   
 
 </dt>
 <dd>
-  
+  Called when the request is about to be sent.
   <div class="features"><span class="feature">override</span></div>
 
 </dd>
 
-        <dt id="setup" class="callable">
-  <span class="name"><a href="../trustpin_sdk_method_channel/MethodChannelTrustPinSDK/setup.html">setup</a></span><span class="signature">(<wbr><span class="parameter" id="setup-param-organizationId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">organizationId</span>, </span><span class="parameter" id="setup-param-projectId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">projectId</span>, </span><span class="parameter" id="setup-param-publicKey"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">publicKey</span>, {</span><span class="parameter" id="setup-param-configurationURL"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span> <span class="parameter-name">configurationURL</span>, </span><span class="parameter" id="setup-param-mode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">mode</span> = <span class="default-value">&#39;strict&#39;</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+        <dt id="onResponse" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/dio/5.9.0/dio/Interceptor/onResponse.html">onResponse</a></span><span class="signature">(<wbr><span class="parameter" id="onResponse-param-response"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/Response-class.html">Response</a></span> <span class="parameter-name">response</span>, </span><span class="parameter" id="onResponse-param-handler"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/ResponseInterceptorHandler-class.html">ResponseInterceptorHandler</a></span> <span class="parameter-name">handler</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
   </span>
   
 
 </dt>
-<dd>
-  
-  <div class="features"><span class="feature">override</span></div>
+<dd class="inherited">
+  Called when the response is about to be resolved.
+  <div class="features"><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -194,20 +230,6 @@
 <dd class="inherited">
   A string representation of this object.
   <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="verify" class="callable">
-  <span class="name"><a href="../trustpin_sdk_method_channel/MethodChannelTrustPinSDK/verify.html">verify</a></span><span class="signature">(<wbr><span class="parameter" id="verify-param-domain"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">domain</span>, </span><span class="parameter" id="verify-param-certificate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">certificate</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Ensures that the platform instance was constructed with a non-<code>const</code> token
-that matches the provided token and throws <a href="https://api.flutter.dev/flutter/dart-core/AssertionError-class.html">AssertionError</a> if not.
-  <div class="features"><span class="feature">override</span></div>
 
 </dd>
 
@@ -248,11 +270,11 @@ that matches the provided token and throws <a href="https://api.flutter.dev/flut
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">trustpin_sdk</a></li>
-    <li><a href="../trustpin_sdk_method_channel/">trustpin_sdk_method_channel</a></li>
-    <li class="self-crumb">MethodChannelTrustPinSDK class</li>
+    <li><a href="../http_interceptors_dio_interceptor/">dio_interceptor</a></li>
+    <li class="self-crumb">TrustPinDioInterceptor class</li>
 </ol>
 
-    <h5>trustpin_sdk_method_channel library</h5>
+    <h5>dio_interceptor library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div>
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

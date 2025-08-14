@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the setup method from the MethodChannelTrustPinSDK class, for the Dart programming language.">
-  <title>setup method - MethodChannelTrustPinSDK class - trustpin_sdk_method_channel library - Dart API</title>
+  <meta name="description" content="API docs for the onRequest method from the TrustPinDioInterceptor class, for the Dart programming language.">
+  <title>onRequest method - TrustPinDioInterceptor class - dio_interceptor library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">trustpin_sdk</a></li>
-    <li><a href="../../trustpin_sdk_method_channel/">trustpin_sdk_method_channel.dart</a></li>
-    <li><a href="../../trustpin_sdk_method_channel/MethodChannelTrustPinSDK-class.html">MethodChannelTrustPinSDK</a></li>
-    <li class="self-crumb">setup method</li>
+    <li><a href="../../http_interceptors_dio_interceptor/">http_interceptors&#47;dio_interceptor.dart</a></li>
+    <li><a href="../../http_interceptors_dio_interceptor/TrustPinDioInterceptor-class.html">TrustPinDioInterceptor</a></li>
+    <li class="self-crumb">onRequest method</li>
   </ol>
-  <div class="self-name">setup</div>
+  <div class="self-name">onRequest</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,10 +46,10 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="trustpin_sdk_method_channel&#47;MethodChannelTrustPinSDK-class-sidebar.html"
+    data-above-sidebar="http_interceptors_dio_interceptor&#47;TrustPinDioInterceptor-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">setup</span> method 
+<h1><span class="kind-method">onRequest</span> method 
 </h1></div>
 
     <section class="multi-line-signature">
@@ -59,38 +59,61 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">setup</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="setup-param-organizationId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">organizationId</span>, </span></li>
-<li><span class="parameter" id="setup-param-projectId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">projectId</span>, </span></li>
-<li><span class="parameter" id="setup-param-publicKey"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">publicKey</span>, {</span></li>
-<li><span class="parameter" id="setup-param-configurationURL"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Uri-class.html">Uri</a>?</span> <span class="parameter-name">configurationURL</span>, </span></li>
-<li><span class="parameter" id="setup-param-mode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">mode</span> = <span class="default-value">&#39;strict&#39;</span>, </span></li>
-</ol>})
+<span class="returntype">void</span>
+<span class="name ">onRequest</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="onRequest-param-options"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/RequestOptions-class.html">RequestOptions</a></span> <span class="parameter-name">options</span>, </span></li>
+<li><span class="parameter" id="onRequest-param-handler"><span class="type-annotation"><a href="https://pub.dev/documentation/dio/5.9.0/dio/RequestInterceptorHandler-class.html">RequestInterceptorHandler</a></span> <span class="parameter-name">handler</span></span></li>
+</ol>)
 
       <div class="features"><span class="feature">override</span></div>
 
     </section>
     
+<section class="desc markdown">
+  <p>Called when the request is about to be sent.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-Future&lt;void&gt; setup(
-  String organizationId,
-  String projectId,
-  String publicKey, {
-  Uri? configurationURL,
-  String mode = &#39;strict&#39;,
-}) async {
-  await methodChannel.invokeMethod(&#39;setup&#39;, {
-    &#39;organizationId&#39;: organizationId,
-    &#39;projectId&#39;: projectId,
-    &#39;publicKey&#39;: publicKey,
-    &#39;configurationURL&#39;: configurationURL?.toString(),
-    &#39;mode&#39;: mode,
-  });
+void onRequest(
+  RequestOptions options,
+  RequestInterceptorHandler handler,
+) async {
+  final uri = options.uri;
+
+  &#47;&#47; Only validate HTTPS requests
+  if (uri.scheme == &#39;https&#39;) {
+    try {
+      await _validateCertificate(uri.host, uri.port);
+      &#47;&#47; Certificate validation passed, proceed with request
+      handler.next(options);
+    } on TrustPinException catch (e) {
+      &#47;&#47; Certificate validation failed, reject the request
+      handler.reject(
+        DioException(
+          requestOptions: options,
+          error: e,
+          type: DioExceptionType.connectionError,
+          message: &#39;Certificate pinning validation failed&#39;,
+        ),
+      );
+    } catch (e) {
+      &#47;&#47; Other errors during validation
+      handler.reject(
+        DioException(
+          requestOptions: options,
+          error: e,
+          type: DioExceptionType.connectionError,
+          message: &#39;Certificate pinning validation failed&#39;,
+        ),
+      );
+    }
+  } else {
+    &#47;&#47; Not HTTPS, proceed without validation
+    handler.next(options);
+  }
 }</code></pre>
 </section>
 
@@ -105,12 +128,12 @@ Future&lt;void&gt; setup(
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">trustpin_sdk</a></li>
-    <li><a href="../../trustpin_sdk_method_channel/">trustpin_sdk_method_channel</a></li>
-    <li><a href="../../trustpin_sdk_method_channel/MethodChannelTrustPinSDK-class.html">MethodChannelTrustPinSDK</a></li>
-    <li class="self-crumb">setup method</li>
+    <li><a href="../../http_interceptors_dio_interceptor/">dio_interceptor</a></li>
+    <li><a href="../../http_interceptors_dio_interceptor/TrustPinDioInterceptor-class.html">TrustPinDioInterceptor</a></li>
+    <li class="self-crumb">onRequest method</li>
 </ol>
 
-    <h5>MethodChannelTrustPinSDK class</h5>
+    <h5>TrustPinDioInterceptor class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
