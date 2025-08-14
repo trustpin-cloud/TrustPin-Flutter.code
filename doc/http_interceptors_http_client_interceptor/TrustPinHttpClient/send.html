@@ -59,8 +59,8 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/http/1.4.0/http/StreamedResponse-class.html">StreamedResponse</a></span>&gt;</span></span>
-<span class="name ">send</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="send-param-request"><span class="type-annotation"><a href="https://pub.dev/documentation/http/1.4.0/http/BaseRequest-class.html">BaseRequest</a></span> <span class="parameter-name">request</span></span></li>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/http/1.5.0/http/StreamedResponse-class.html">StreamedResponse</a></span>&gt;</span></span>
+<span class="name ">send</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="send-param-request"><span class="type-annotation"><a href="https://pub.dev/documentation/http/1.5.0/http/BaseRequest-class.html">BaseRequest</a></span> <span class="parameter-name">request</span></span></li>
 </ol>)
 
       <div class="features"><span class="feature">override</span></div>
@@ -69,11 +69,11 @@
     
 <section class="desc markdown">
   <p>Sends an HTTP request and asynchronously returns the response.</p>
-<p>Implementers should call <a href="https://pub.dev/documentation/http/1.4.0/http/BaseRequest/finalize.html">BaseRequest.finalize</a> to get the body of the
-request as a <a href="https://pub.dev/documentation/http/1.4.0/http/ByteStream-class.html">ByteStream</a>. They shouldn't make any assumptions about the
+<p>Implementers should call <a href="https://pub.dev/documentation/http/1.5.0/http/BaseRequest/finalize.html">BaseRequest.finalize</a> to get the body of the
+request as a <a href="https://pub.dev/documentation/http/1.5.0/http/ByteStream-class.html">ByteStream</a>. They shouldn't make any assumptions about the
 state of the stream; it could have data written to it asynchronously at a
 later point, or it could already be closed when it's returned. Any
-internal HTTP errors should be wrapped as <a href="https://pub.dev/documentation/http/1.4.0/http/ClientException-class.html">ClientException</a>s.</p>
+internal HTTP errors should be wrapped as <a href="https://pub.dev/documentation/http/1.5.0/http/ClientException-class.html">ClientException</a>s.</p>
 </section>
 
 
@@ -118,7 +118,7 @@ Future&lt;http.StreamedResponse&gt; send(http.BaseRequest request) async {
 <footer>
   <span class="no-break">
     trustpin_sdk
-      1.0.0
+      1.2.0
   </span>
   
 </footer>
