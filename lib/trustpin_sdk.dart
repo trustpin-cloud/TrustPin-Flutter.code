@@ -3,6 +3,7 @@ import 'trustpin_log_level.dart';
 import 'trustpin_mode.dart';
 import 'trustpin_sdk_platform_interface.dart';
 
+export 'http_interceptors/dio_interceptor.dart';
 export 'http_interceptors/http_client_interceptor.dart';
 export 'trustpin_exception.dart';
 export 'trustpin_log_level.dart';

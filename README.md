@@ -40,6 +40,7 @@ A comprehensive Flutter plugin for **[TrustPin](https://trustpin.cloud)** SSL ce
 - **🛡️ Thread Safety**: Built with Flutter's async/await pattern and native concurrency models
 - **⚡ Intelligent Caching**: 10-minute configuration caching with stale fallback for performance
 - **🔐 ECDSA P-256 Signature Verification**: Cryptographic validation of configuration integrity
+- **🚀 HTTP Client Integration**: Built-in interceptors for popular HTTP clients (http, Dio)
 
 ## 📦 Installation
 
@@ -92,7 +93,7 @@ The macOS implementation uses the same native TrustPin Swift SDK as iOS, automat
 
 ### Android Requirements
 
-- **Minimum SDK**: API 21 (Android 5.0)+
+- **Minimum SDK**: API 25 (Android 5.0)+
 - **Target SDK**: API 34+ (recommended)
 - **Kotlin**: 1.9.0+
 - **Native Dependencies**: TrustPin Kotlin SDK (automatically configured)
@@ -161,9 +162,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final TrustPinSDK _trustPin = TrustPinSDK();
-  bool _isInitialized = false;
-
   @override
   void initState() {
     super.initState();
@@ -173,25 +171,20 @@ class _MyAppState extends State<MyApp> {
   Future<void> _initializeTrustPin() async {
     try {
       // Set debug logging for development
-      await _trustPin.setLogLevel(TrustPinLogLevel.debug);
+      await TrustPin.setLogLevel(TrustPinLogLevel.debug);
       
       // Initialize with your credentials
-      await _trustPin.setup(
+      await TrustPin.setup(
         organizationId: 'your-org-id',
         projectId: 'your-project-id',
         publicKey: 'LS0tLS1CRUdJTi...', // Your Base64 public key
         mode: TrustPinMode.strict, // Use strict mode for production
       );
       
-      setState(() {
-        _isInitialized = true;
-      });
-      
       print('TrustPin SDK initialized successfully!');
     } catch (e) {
       print('Failed to initialize TrustPin: $e');
     }
-  }
 }
 ```
 
@@ -199,11 +192,6 @@ class _MyAppState extends State<MyApp> {
 
 ```dart
 Future<void> verifyServerCertificate() async {
-  if (!_isInitialized) {
-    print('TrustPin not initialized yet');
-    return;
-  }
-
   // Example PEM certificate (in practice, you'd get this from your HTTP client)
   const pemCertificate = '''
 -----BEGIN CERTIFICATE-----
@@ -212,7 +200,7 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8...
 ''';
 
   try {
-    await _trustPin.verify('api.example.com', pemCertificate);
+    await TrustPin.verify('api.example.com', pemCertificate);
     print('✅ Certificate is valid and matches configured pins!');
   } on TrustPinException catch (e) {
     print('❌ Certificate verification failed: ${e.code} - ${e.message}');
@@ -237,124 +225,95 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8...
 
 #### Using with Dio
 
+The SDK provides a built-in `TrustPinDioInterceptor` for seamless Dio integration:
+
 ```dart
 import 'package:dio/dio.dart';
 import 'package:trustpin_sdk/trustpin_sdk.dart';
 
-class TrustPinInterceptor extends Interceptor {
-  final TrustPinSDK _trustPin;
-  
-  TrustPinInterceptor(this._trustPin);
+// Create Dio instance with TrustPin certificate validation
+final dio = Dio();
+dio.interceptors.add(TrustPinDioInterceptor());
 
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) async {
-    final uri = response.requestOptions.uri;
-    
-    if (uri.scheme == 'https') {
-      try {
-        // In a real implementation, you'd extract the certificate from the response
-        // This is a simplified example
-        final certificate = await _getCertificateFromResponse(response);
-        await _trustPin.verify(uri.host, certificate);
-        print('Certificate verified for ${uri.host}');
-      } catch (e) {
-        print('Certificate verification failed for ${uri.host}: $e');
-        // Decide whether to reject the response or allow it
-      }
-    }
-    
-    handler.next(response);
-  }
-  
-  Future<String> _getCertificateFromResponse(Response response) async {
-    // Implementation depends on your HTTP client setup
-    // You might need to configure the HTTP client to capture certificates
-    throw UnimplementedError('Certificate extraction needs to be implemented based on your HTTP client setup');
+// All HTTPS requests will now have certificate pinning validation
+try {
+  final response = await dio.get('https://api.example.com/data');
+  print('Request successful: ${response.statusCode}');
+} on DioException catch (e) {
+  if (e.error is TrustPinException) {
+    final trustPinError = e.error as TrustPinException;
+    print('Certificate pinning failed: ${trustPinError.code} - ${trustPinError.message}');
+  } else {
+    print('Request failed: ${e.message}');
   }
 }
 
-// Usage
-final dio = Dio();
-dio.interceptors.add(TrustPinInterceptor(_trustPin));
+// The interceptor automatically:
+// 1. Validates standard TLS certificates (OS-level validation)
+// 2. Performs TrustPin certificate pinning validation
+// 3. Caches certificates for performance
+// 4. Prevents requests with invalid certificates
+
+// Manage certificate cache if needed
+final interceptor = TrustPinDioInterceptor();
+dio.interceptors.add(interceptor);
+
+// Clear all cached certificates
+interceptor.clearCertificateCache();
 ```
 
-#### Using with http package
+#### Using with http package  
+
+The SDK provides a built-in `TrustPinHttpClient` that wraps the standard http.Client:
 
 ```dart
-import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:trustpin_sdk/trustpin_sdk.dart';
 
-class TrustPinHttpClient extends http.BaseClient {
-  final http.Client _client;
-  final TrustPinSDK _trustPin;
-  
-  TrustPinHttpClient(this._trustPin) : _client = http.Client();
+// Create a TrustPin-enabled HTTP client
+final httpClient = TrustPinHttpClient.create();
 
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    // Custom HttpClient with certificate callback
-    final client = HttpClient();
-    
-    client.badCertificateCallback = (cert, host, port) {
-      // Convert X509Certificate to PEM format
-      final pemCert = _x509ToPem(cert);
-      
-      try {
-        // Verify certificate synchronously (note: this blocks the callback)
-        // In production, you might want to implement this differently
-        _trustPin.verify(host, pemCert);
-        return true; // Certificate is valid
-      } catch (e) {
-        print('Certificate verification failed for $host: $e');
-        return false; // Reject certificate
-      }
-    };
-    
-    // Continue with normal HTTP processing
-    return _client.send(request);
-  }
-  
-  String _x509ToPem(X509Certificate cert) {
-    // Convert X509Certificate to PEM format
-    // This is a simplified implementation
-    final derBytes = cert.der;
-    final base64String = base64Encode(derBytes);
-    return '-----BEGIN CERTIFICATE-----\n$base64String\n-----END CERTIFICATE-----';
-  }
-  
-  @override
-  void close() {
-    _client.close();
-  }
-}
+// Or wrap an existing client
+final customClient = http.Client();
+final httpClient = TrustPinHttpClient(customClient);
 
-// Usage
-final httpClient = TrustPinHttpClient(_trustPin);
+// Use it like a normal http.Client
 final response = await httpClient.get(Uri.parse('https://api.example.com/data'));
+
+// The client automatically:
+// 1. Validates standard TLS certificates
+// 2. Performs TrustPin certificate pinning
+// 3. Caches certificates for performance
+
+// Clear certificate cache if needed
+httpClient.clearCertificateCache();
+
+// Clean up when done
+httpClient.close();
 ```
 
 ### Environment-Specific Configuration
 
 ```dart
 class TrustPinConfig {
-  static Future<void> initializeForEnvironment(TrustPinSDK trustPin) async {
+  static Future<void> initializeForEnvironment() async {
     const environment = String.fromEnvironment('ENVIRONMENT', defaultValue: 'development');
     
     switch (environment) {
       case 'production':
-        await _initializeProduction(trustPin);
+        await _initializeProduction();
         break;
       case 'staging':
-        await _initializeStaging(trustPin);
+        await _initializeStaging();
         break;
       default:
-        await _initializeDevelopment(trustPin);
+        await _initializeDevelopment();
     }
   }
   
-  static Future<void> _initializeProduction(TrustPinSDK trustPin) async {
-    await trustPin.setLogLevel(TrustPinLogLevel.error);
-    await trustPin.setup(
+  static Future<void> _initializeProduction() async {
+    await TrustPin.setLogLevel(TrustPinLogLevel.error);
+    await TrustPin.setup(
       organizationId: 'prod-org-123',
       projectId: 'prod-project-456',
       publicKey: 'LS0tLS1CRUdJTi...', // Production public key
@@ -362,9 +321,9 @@ class TrustPinConfig {
     );
   }
   
-  static Future<void> _initializeStaging(TrustPinSDK trustPin) async {
-    await trustPin.setLogLevel(TrustPinLogLevel.info);
-    await trustPin.setup(
+  static Future<void> _initializeStaging() async {
+    await TrustPin.setLogLevel(TrustPinLogLevel.info);
+    await TrustPin.setup(
       organizationId: 'staging-org-123',
       projectId: 'staging-project-456', 
       publicKey: 'LS0tLS1CRUdJTi...', // Staging public key
@@ -372,9 +331,9 @@ class TrustPinConfig {
     );
   }
   
-  static Future<void> _initializeDevelopment(TrustPinSDK trustPin) async {
-    await trustPin.setLogLevel(TrustPinLogLevel.debug);
-    await trustPin.setup(
+  static Future<void> _initializeDevelopment() async {
+    await TrustPin.setLogLevel(TrustPinLogLevel.debug);
+    await TrustPin.setup(
       organizationId: 'dev-org-123',
       projectId: 'dev-project-456',
       publicKey: 'LS0tLS1CRUdJTi...', // Development public key
@@ -387,8 +346,7 @@ class TrustPinConfig {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  final trustPin = TrustPinSDK();
-  await TrustPinConfig.initializeForEnvironment(trustPin);
+  await TrustPinConfig.initializeForEnvironment();
   
   runApp(MyApp());
 }
@@ -471,7 +429,7 @@ class TrustPinErrorHandler {
 
 // Usage
 try {
-  await trustPin.verify('api.example.com', certificate);
+  await TrustPin.verify('api.example.com', certificate);
 } on TrustPinException catch (e) {
   TrustPinErrorHandler.handleVerificationError(e, 'api.example.com');
   // Decide whether to proceed with the request or abort
@@ -483,17 +441,18 @@ try {
 
 For complete API documentation, visit our **[GitHub Pages Documentation](https://trustpin-cloud.github.io/TrustPin-Flutter.code/)**.
 
-### TrustPinSDK
+### TrustPin Class (Static Methods)
 
-#### setup()
+#### TrustPin.setup()
 
 Initializes the TrustPin SDK with your project credentials.
 
 ```dart
-Future<void> setup({
+static Future<void> setup({
   required String organizationId,
   required String projectId,
   required String publicKey,
+  Uri? configurationURL, // Optional custom URL for self-hosted configurations
   TrustPinMode mode = TrustPinMode.strict,
 })
 ```
@@ -502,16 +461,17 @@ Future<void> setup({
 - `organizationId`: Your organization identifier from the TrustPin dashboard
 - `projectId`: Your project identifier from the TrustPin dashboard
 - `publicKey`: Base64-encoded ECDSA P-256 public key for JWS verification
+- `configurationURL`: Optional custom URL for self-hosted configurations (null for CDN-managed)
 - `mode`: Pinning mode (strict or permissive)
 
 **Throws:** `TrustPinException` if setup fails
 
-#### verify()
+#### TrustPin.verify()
 
 Verifies a certificate against the configured pins for a domain.
 
 ```dart
-Future<void> verify(String domain, String certificate)
+static Future<void> verify(String domain, String certificate)
 ```
 
 **Parameters:**
@@ -520,13 +480,54 @@ Future<void> verify(String domain, String certificate)
 
 **Throws:** `TrustPinException` if verification fails
 
-#### setLogLevel()
+#### TrustPin.setLogLevel()
 
 Sets the logging level for TrustPin SDK.
 
 ```dart
-Future<void> setLogLevel(TrustPinLogLevel level)
+static Future<void> setLogLevel(TrustPinLogLevel level)
 ```
+
+### TrustPinHttpClient Class
+
+A certificate pinning interceptor for the http package that wraps any http.Client.
+
+#### Constructor
+
+```dart
+TrustPinHttpClient(http.Client inner)
+```
+
+#### Factory Constructor
+
+```dart
+factory TrustPinHttpClient.create()
+```
+
+Creates a TrustPinHttpClient with a default http.Client.
+
+#### Methods
+
+- `send(BaseRequest request)`: Sends HTTP request with certificate validation
+- `clearCertificateCache()`: Clears the internal certificate cache
+- `close()`: Closes the client and clears resources
+
+### TrustPinDioInterceptor Class
+
+A certificate pinning interceptor for the Dio HTTP client.
+
+#### Constructor
+
+```dart
+TrustPinDioInterceptor()
+```
+
+Creates a new interceptor that validates certificates for all HTTPS requests made through Dio.
+
+#### Methods
+
+- `onRequest(RequestOptions, RequestInterceptorHandler)`: Validates certificates before sending requests
+- `clearCertificateCache()`: Clears the internal certificate cache
 
 ### Enums
 
@@ -714,9 +715,8 @@ If you're currently using the native TrustPin SDKs directly:
    // val trustPin = TrustPin.create()
    // trustPin.setup("...", "...", "...")
    
-   // New (Flutter)
-   final trustPin = TrustPinSDK();
-   await trustPin.setup(
+   // New (Flutter) - Using static methods
+   await TrustPin.setup(
      organizationId: 'your-org-id',
      projectId: 'your-project-id',
      publicKey: 'your-public-key',
@@ -732,13 +732,13 @@ If you're currently using the native TrustPin SDKs directly:
    // Old (Android)
    // trustPin.verify("api.example.com", x509Certificate)
    
-   // New (Flutter)
-   await trustPin.verify('api.example.com', pemCertificate);
+   // New (Flutter) - Using static methods
+   await TrustPin.verify('api.example.com', pemCertificate);
    ```
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](./devs/README.md) for detailed information about:
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for detailed information about:
 
 - Development environment setup
 - Code style guidelines
