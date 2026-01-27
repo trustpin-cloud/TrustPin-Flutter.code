@@ -1,16 +1,16 @@
 PODS:
   - Flutter (1.0.0)
-  - trustpin_sdk (1.2.0):
+  - trustpin_sdk (2.0.0):
     - Flutter
-    - TrustPinKit (= 1.2.0)
-  - TrustPinKit (1.2.0)
+    - TrustPinKit (= 2.0.0)
+  - TrustPinKit (2.0.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - trustpin_sdk (from `.symlinks/plugins/trustpin_sdk/ios`)
 
 SPEC REPOS:
-  trunk:
+  https://github.com/CocoaPods/Specs.git:
     - TrustPinKit
 
 EXTERNAL SOURCES:
@@ -20,10 +20,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/trustpin_sdk/ios"
 
 SPEC CHECKSUMS:
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  trustpin_sdk: eeca99589ba2591b13a9a68ad11a660ec8199261
-  TrustPinKit: 921ab3dfdc4fefa281fd7c60e075d9d10a702a5b
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  trustpin_sdk: 63af4c8beed823b09071d979360734ceac247fdd
+  TrustPinKit: c2de6a37e2f1183262bc6b51178e94466a876d4e
 
-PODFILE CHECKSUM: 11b9e74bc3f63775ff7f35ece73a61c7f3274e47
+PODFILE CHECKSUM: e38641a6783645f2f9f4cdfedbdf507f279b972b
 
 COCOAPODS: 1.16.2

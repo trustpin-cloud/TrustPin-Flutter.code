@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-26
+
+- Added support for SPKI and AWS Certificate Manager and similar
+
+### Updated
+
+- **iOS**: Updated SDK to v2.0.0
+- **macOS**: Updated SDK to v2.0.0
+- **Android**: Updated SDK to v2.0.0
+- **Documentation**: Updated documentation and examples
+
+## [1.3.0] - 2026-01-23
+
+### Updated
+
+- **iOS**: Updated SDK to v1.3.0
+- **macOS**: Updated SDK to v1.3.0
+- **Android**: Updated SDK to v1.3.0
+- **Documentation**: Updated documentation and examples
+
 ## [1.2.0] - 2025-08-14
 
 ### Updated
