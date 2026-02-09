@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - trustpin_sdk (2.0.0):
+  - trustpin_sdk (2.1.0):
     - Flutter
-    - TrustPinKit (= 2.0.0)
-  - TrustPinKit (2.0.0)
+    - TrustPinKit (= 2.1.1)
+  - TrustPinKit (2.1.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -21,9 +21,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  trustpin_sdk: 63af4c8beed823b09071d979360734ceac247fdd
-  TrustPinKit: c2de6a37e2f1183262bc6b51178e94466a876d4e
+  trustpin_sdk: f1f22a31b4f2b7941fbba05588f33d0944fbcb34
+  TrustPinKit: e1ffebae404f5cbb17e443544494c5879d15a0d3
 
-PODFILE CHECKSUM: e38641a6783645f2f9f4cdfedbdf507f279b972b
+PODFILE CHECKSUM: f3e862cc98e9b6198ecf94a0c39e3d3b520e1283
 
 COCOAPODS: 1.16.2
