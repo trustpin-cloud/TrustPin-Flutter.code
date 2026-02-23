@@ -40,4 +40,8 @@ abstract class TrustPinSDKPlatform extends PlatformInterface {
   Future<void> setLogLevel(String logLevel) {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
+
+  Future<String> fetchCertificate(String host, {int port = 443}) {
+    throw UnimplementedError('fetchCertificate() has not been implemented.');
+  }
 }

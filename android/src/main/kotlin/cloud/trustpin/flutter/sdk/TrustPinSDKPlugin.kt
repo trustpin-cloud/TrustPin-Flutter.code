@@ -1,6 +1,7 @@
 package cloud.trustpin.flutter.sdk
 
 import cloud.trustpin.kotlin.sdk.TrustPin
+import cloud.trustpin.kotlin.sdk.TrustPinConfiguration
 import cloud.trustpin.kotlin.sdk.TrustPinError
 import cloud.trustpin.kotlin.sdk.TrustPinLogLevel
 import cloud.trustpin.kotlin.sdk.TrustPinMode
@@ -13,6 +14,8 @@ import io.flutter.plugin.common.MethodChannel.Result
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 import java.security.cert.CertificateFactory
@@ -25,10 +28,12 @@ import java.net.URL
 /** TrustPinSDKPlugin */
 class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
-  private val coroutineScope = CoroutineScope(Dispatchers.Main)
+
+  // Use SupervisorJob for proper lifecycle management and cancellation
+  private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "trustpin_sdk")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "cloud.trustpin.sdk.flutter")
     channel.setMethodCallHandler(this)
   }
 
@@ -37,6 +42,7 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
       "setup" -> handleSetup(call, result)
       "verify" -> handleVerify(call, result)
       "setLogLevel" -> handleSetLogLevel(call, result)
+      "fetchCertificate" -> handleFetchCertificate(call, result)
       else -> result.notImplemented()
     }
   }
@@ -47,6 +53,7 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
         val organizationId = call.argument<String>("organizationId")
         val projectId = call.argument<String>("projectId")
         val publicKey = call.argument<String>("publicKey")
+        val instanceId = call.argument<String>("instanceId")
         val configurationURL = call.argument<String>("configurationURL")
         val modeString = call.argument<String>("mode") ?: "strict"
 
@@ -61,17 +68,26 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
           else -> TrustPinMode.STRICT
         }
 
-        if (configurationURL != null && configurationURL.isNotEmpty()) {
-          val url = try {
+        val url = if (configurationURL != null && configurationURL.isNotEmpty()) {
+          try {
             URI.create(configurationURL).toURL()
           } catch (e: Exception) {
             throw TrustPinError.InvalidProjectConfig
           }
-
-          TrustPin.setup(organizationId, projectId, publicKey, url, mode)
         } else {
-          TrustPin.setup(organizationId, projectId, publicKey, mode)
+          null
         }
+
+        val configuration = TrustPinConfiguration(
+          organizationId = organizationId,
+          projectId = projectId,
+          publicKey = publicKey,
+          mode = mode,
+          configurationURL = url
+        )
+
+        val trustPin = getTrustPinInstance(instanceId)
+        trustPin.setup(configuration)
 
         result.success(null)
       } catch (e: TrustPinError) {
@@ -87,6 +103,7 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
       try {
         val domain = call.argument<String>("domain")
         val certificatePem = call.argument<String>("certificate")
+        val instanceId = call.argument<String>("instanceId")
 
         if (domain == null || certificatePem == null) {
           result.error("INVALID_ARGUMENTS", "Missing required arguments", null)
@@ -94,7 +111,9 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
         }
 
         val certificate = parsePemCertificate(certificatePem)
-        TrustPin.verify(domain, certificate)
+        val trustPin = getTrustPinInstance(instanceId)
+
+        trustPin.verify(domain, certificate)
         result.success(null)
       } catch (e: TrustPinError) {
         result.error(mapTrustPinError(e), e.message, null)
@@ -107,6 +126,8 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
   private fun handleSetLogLevel(call: MethodCall, result: Result) {
     try {
       val logLevelString = call.argument<String>("logLevel")
+      val instanceId = call.argument<String>("instanceId")
+
       if (logLevelString == null) {
         result.error("INVALID_ARGUMENTS", "Missing logLevel argument", null)
         return
@@ -120,10 +141,36 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
         else -> TrustPinLogLevel.ERROR
       }
 
-      TrustPin.setLogLevel(logLevel)
+      val trustPin = getTrustPinInstance(instanceId)
+      trustPin.setLogLevel(logLevel)
+
       result.success(null)
     } catch (e: Exception) {
       result.error("SET_LOG_LEVEL_ERROR", e.message, null)
+    }
+  }
+
+  private fun handleFetchCertificate(call: MethodCall, result: Result) {
+    coroutineScope.launch {
+      try {
+        val host = call.argument<String>("host")
+        val port = call.argument<Int>("port") ?: 443
+        val instanceId = call.argument<String>("instanceId")
+
+        if (host == null) {
+          result.error("INVALID_ARGUMENTS", "Missing required arguments", null)
+          return@launch
+        }
+
+        val trustPin = getTrustPinInstance(instanceId)
+        val pem = trustPin.fetchCertificate(host, port)
+
+        result.success(pem)
+      } catch (e: TrustPinError) {
+        result.error(mapTrustPinError(e), e.message, null)
+      } catch (e: Exception) {
+        result.error("FETCH_CERTIFICATE_ERROR", e.message, null)
+      }
     }
   }
 
@@ -137,9 +184,19 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
       .replace("\\s".toRegex(), "")
 
     val decodedBytes = Base64.getDecoder().decode(cleanPem)
-    val inputStream = ByteArrayInputStream(decodedBytes)
 
-    return certificateFactory.generateCertificate(inputStream) as X509Certificate
+    // Use 'use' to ensure the stream is properly closed
+    return ByteArrayInputStream(decodedBytes).use { inputStream ->
+      certificateFactory.generateCertificate(inputStream) as X509Certificate
+    }
+  }
+
+  private fun getTrustPinInstance(instanceId: String?): TrustPin {
+    return if (instanceId.isNullOrEmpty()) {
+      TrustPin.default
+    } else {
+      TrustPin.instance(instanceId)
+    }
   }
 
   private fun mapTrustPinError(error: TrustPinError): String {
@@ -157,5 +214,7 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+    // Cancel all running coroutines to prevent memory leaks and crashes
+    coroutineScope.cancel()
   }
 }

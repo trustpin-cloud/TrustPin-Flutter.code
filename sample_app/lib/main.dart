@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:trustpin_sdk/trustpin_sdk.dart';
 
@@ -264,7 +267,7 @@ class _ContentViewState extends State<ContentView> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: _isTesting 
+                    child: _isTesting
                       ? const SizedBox(
                           height: 20,
                           width: 20,
@@ -279,19 +282,35 @@ class _ContentViewState extends State<ContentView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _clearLog,
+                    onPressed: !_isTesting ? _fetchCertificate : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: trustPinGreen,
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.all(16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Clear Log'),
+                    child: const Text('Fetch Certificate'),
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _clearLog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: trustPinGreen,
+                  padding: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Clear Log'),
+              ),
             ),
             const SizedBox(height: 16),
             
@@ -403,6 +422,59 @@ class _ContentViewState extends State<ContentView> {
       });
       _logMessage("❌ TrustPin configuration failed: $e");
     }
+  }
+
+  Future<void> _fetchCertificate() async {
+    final testUrl = _testUrlController.text.trim();
+    if (testUrl.isEmpty) {
+      _logMessage("Warning: No URL provided");
+      return;
+    }
+
+    setState(() {
+      _isTesting = true;
+      _statusMessage = "Fetching certificate...";
+    });
+
+    try {
+      final uri = Uri.parse(testUrl);
+      final host = uri.host;
+      final port = uri.hasPort ? uri.port : 443;
+
+      _logMessage("Fetching certificate for $host:$port ...");
+      final pem = await TrustPin.fetchCertificate(host, port: port);
+
+      final derBytes = _pemToBytes(pem);
+      final hash = sha256.convert(derBytes);
+
+      _logMessage("Certificate fetched (${pem.length} chars)");
+      _logMessage("SHA-256: $hash");
+      _logMessage(pem.trim());
+
+      setState(() {
+        _isTesting = false;
+        _statusMessage = _isConfigured ? "TrustPin configured" : "TrustPin not configured";
+      });
+    } on TrustPinException catch (e) {
+      setState(() {
+        _isTesting = false;
+        _statusMessage = _isConfigured ? "TrustPin configured" : "TrustPin not configured";
+      });
+      _logMessage("Fetch failed: $e");
+    } catch (e) {
+      setState(() {
+        _isTesting = false;
+        _statusMessage = _isConfigured ? "TrustPin configured" : "TrustPin not configured";
+      });
+      _logMessage("Error: $e");
+    }
+  }
+
+  List<int> _pemToBytes(String pem) {
+    final lines = pem.split('\n')
+        .where((l) => !l.startsWith('-----') && l.trim().isNotEmpty)
+        .join();
+    return base64Decode(lines);
   }
 
   Future<void> _testConnection() async {

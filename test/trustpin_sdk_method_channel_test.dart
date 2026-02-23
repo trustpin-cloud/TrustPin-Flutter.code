@@ -88,6 +88,25 @@ void main() {
               );
             }
             return null;
+          case 'fetchCertificate':
+            final args = Map<String, dynamic>.from(methodCall.arguments as Map);
+            final host = args['host'] as String;
+
+            if (host.isEmpty) {
+              throw PlatformException(
+                code: 'INVALID_ARGUMENTS',
+                message: 'Missing required arguments',
+              );
+            }
+
+            if (host == 'invalid-host.example') {
+              throw PlatformException(
+                code: 'INVALID_SERVER_CERT',
+                message: 'TLS handshake failed',
+              );
+            }
+
+            return '-----BEGIN CERTIFICATE-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END CERTIFICATE-----\n';
           default:
             throw MissingPluginException('No implementation found for method ${methodCall.method}');
         }
@@ -322,9 +341,48 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8...
       });
     });
 
+    group('fetchCertificate()', () {
+      test('should call native fetchCertificate with correct parameters', () async {
+        final result = await platform.fetchCertificate('api.example.com');
+
+        expect(methodCalls.length, equals(1));
+        expect(methodCalls[0].method, equals('fetchCertificate'));
+
+        final args = Map<String, dynamic>.from(methodCalls[0].arguments as Map);
+        expect(args['host'], equals('api.example.com'));
+        expect(args['port'], equals(443));
+        expect(result, contains('BEGIN CERTIFICATE'));
+      });
+
+      test('should pass custom port', () async {
+        await platform.fetchCertificate('api.example.com', port: 8443);
+
+        final args = Map<String, dynamic>.from(methodCalls[0].arguments as Map);
+        expect(args['host'], equals('api.example.com'));
+        expect(args['port'], equals(8443));
+      });
+
+      test('should return PEM string', () async {
+        final result = await platform.fetchCertificate('api.example.com');
+
+        expect(result, contains('-----BEGIN CERTIFICATE-----'));
+        expect(result, contains('-----END CERTIFICATE-----'));
+      });
+
+      test('should throw PlatformException for TLS failure', () async {
+        try {
+          await platform.fetchCertificate('invalid-host.example');
+          fail('Expected PlatformException to be thrown');
+        } on PlatformException catch (e) {
+          expect(e.code, equals('INVALID_SERVER_CERT'));
+          expect(e.message, contains('TLS handshake failed'));
+        }
+      });
+    });
+
     group('Method Channel Configuration', () {
       test('should use correct method channel name', () {
-        expect(platform.methodChannel.name, equals('trustpin_sdk'));
+        expect(platform.methodChannel.name, equals('cloud.trustpin.sdk.flutter'));
       });
     });
 

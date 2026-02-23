@@ -7,7 +7,7 @@ import 'trustpin_sdk_platform_interface.dart';
 class MethodChannelTrustPinSDK extends TrustPinSDKPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('trustpin_sdk');
+  final methodChannel = const MethodChannel('cloud.trustpin.sdk.flutter');
 
   @override
   Future<void> setup(
@@ -37,5 +37,14 @@ class MethodChannelTrustPinSDK extends TrustPinSDKPlatform {
   @override
   Future<void> setLogLevel(String logLevel) async {
     await methodChannel.invokeMethod('setLogLevel', {'logLevel': logLevel});
+  }
+
+  @override
+  Future<String> fetchCertificate(String host, {int port = 443}) async {
+    final result = await methodChannel.invokeMethod<String>(
+      'fetchCertificate',
+      {'host': host, 'port': port},
+    );
+    return result!;
   }
 }

@@ -303,4 +303,37 @@ class TrustPin {
       throw TrustPinException.fromPlatformException(e);
     }
   }
+
+  /// Fetches the TLS leaf certificate from a host as a PEM string.
+  ///
+  /// Opens an ephemeral side-channel TLS connection, performs OS-level chain
+  /// validation, extracts the leaf certificate, and immediately cancels the
+  /// connection without sending any HTTP data.
+  ///
+  /// ## Example Usage
+  ///
+  /// ```dart
+  /// try {
+  ///   final pem = await TrustPin.fetchCertificate('api.example.com');
+  ///   await TrustPin.verify('api.example.com', pem);
+  ///   print('Certificate is valid!');
+  /// } on TrustPinException catch (e) {
+  ///   print('Failed: $e');
+  /// }
+  /// ```
+  ///
+  /// - Parameter [host]: Hostname to connect to (e.g. "api.example.com").
+  /// - Parameter [port]: TCP port (default: 443).
+  ///
+  /// - Returns: PEM-encoded leaf certificate string.
+  ///
+  /// - Throws [TrustPinException] with code `INVALID_SERVER_CERT` if the TLS handshake fails.
+  static Future<String> fetchCertificate(String host, {int port = 443}) async {
+    try {
+      return await TrustPinSDKPlatform.instance
+          .fetchCertificate(host, port: port);
+    } catch (e) {
+      throw TrustPinException.fromPlatformException(e);
+    }
+  }
 }

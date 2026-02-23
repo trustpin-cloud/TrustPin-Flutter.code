@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 
 import '../trustpin_sdk.dart';
@@ -9,11 +6,11 @@ import '../trustpin_sdk.dart';
 ///
 /// This interceptor adds TrustPin certificate validation to all HTTPS requests
 /// made through Dio. It validates certificates in two phases:
-/// 1. Standard TLS validation (handled by the OS)
+/// 1. Standard TLS validation (handled by the OS via [TrustPin.fetchCertificate])
 /// 2. TrustPin certificate pinning validation
 ///
-/// Certificates are cached to avoid repeated socket connections to the same
-/// host. The cache stores certificates but not validation results, so TrustPin
+/// Certificates are cached to avoid repeated TLS connections to the same
+/// host. The cache stores PEM strings but not validation results, so TrustPin
 /// verification is performed on every request.
 ///
 /// ## Usage
@@ -33,7 +30,7 @@ import '../trustpin_sdk.dart';
 /// - Certificate validation happens before the actual HTTP request is sent
 /// - Failed validation prevents the request from being sent
 class TrustPinDioInterceptor extends Interceptor {
-  final Map<String, X509Certificate> _certificateCache = {};
+  final Map<String, String> _certificateCache = {};
 
   /// Creates a new TrustPinDioInterceptor.
   ///
@@ -85,73 +82,14 @@ class TrustPinDioInterceptor extends Interceptor {
     final cacheKey = '$host:$port';
 
     // Check if we have a cached certificate for this host
-    final cachedCert = _certificateCache[cacheKey];
-    if (cachedCert != null) {
-      // Use cached certificate for validation
-      final pemCert = _formatCertificateToPem(cachedCert);
-      await TrustPin.verify(host, pemCert);
-      return;
+    var pemCert = _certificateCache[cacheKey];
+    if (pemCert == null) {
+      // Fetch the leaf certificate via native OS-level TLS validation
+      pemCert = await TrustPin.fetchCertificate(host, port: port);
+      _certificateCache[cacheKey] = pemCert;
     }
 
-    // Create a secure socket connection to get the certificate
-    // We don't override onBadCertificate - let standard TLS validation happen
-    SecureSocket? socket;
-    try {
-      socket = await SecureSocket.connect(
-        host,
-        port,
-        timeout: const Duration(seconds: 10),
-        // Not setting onBadCertificate means it defaults to rejecting bad certificates
-      );
-
-      // If we reach here, the certificate passed standard TLS validation
-      // Now perform additional TrustPin verification
-      final cert = socket.peerCertificate;
-      if (cert != null) {
-        // Cache the certificate for future requests
-        _certificateCache[cacheKey] = cert;
-
-        final pemCert = _formatCertificateToPem(cert);
-        await TrustPin.verify(host, pemCert);
-      } else {
-        throw TrustPinException(
-          'NO_CERTIFICATE',
-          'No certificate received from server',
-        );
-      }
-    } on SocketException catch (e) {
-      // Certificate failed standard TLS validation or connection failed
-      throw TrustPinException(
-        'TLS_VALIDATION_FAILED',
-        'Certificate failed standard TLS validation: ${e.message}',
-      );
-    } on HandshakeException catch (e) {
-      // TLS handshake failed
-      throw TrustPinException(
-        'TLS_HANDSHAKE_FAILED',
-        'TLS handshake failed: ${e.message}',
-      );
-    } finally {
-      socket?.destroy();
-    }
-  }
-
-  String _formatCertificateToPem(X509Certificate cert) {
-    final derBytes = cert.der;
-    final base64Cert = base64Encode(derBytes);
-
-    // Format as PEM with proper line breaks
-    final buffer = StringBuffer();
-    buffer.writeln('-----BEGIN CERTIFICATE-----');
-
-    // Split base64 into 64-character lines
-    for (int i = 0; i < base64Cert.length; i += 64) {
-      final end = (i + 64 < base64Cert.length) ? i + 64 : base64Cert.length;
-      buffer.writeln(base64Cert.substring(i, end));
-    }
-
-    buffer.writeln('-----END CERTIFICATE-----');
-    return buffer.toString();
+    await TrustPin.verify(host, pemCert);
   }
 
   /// Clears the certificate cache.
