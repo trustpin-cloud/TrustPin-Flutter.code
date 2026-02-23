@@ -58,11 +58,11 @@
 <p>This interceptor adds TrustPin certificate validation to all HTTPS requests
 made through Dio. It validates certificates in two phases:</p>
 <ol>
-<li>Standard TLS validation (handled by the OS)</li>
+<li>Standard TLS validation (handled by the OS via <a href="../trustpin_sdk/TrustPin/fetchCertificate.html">TrustPin.fetchCertificate</a>)</li>
 <li>TrustPin certificate pinning validation</li>
 </ol>
-<p>Certificates are cached to avoid repeated socket connections to the same
-host. The cache stores certificates but not validation results, so TrustPin
+<p>Certificates are cached to avoid repeated TLS connections to the same
+host. The cache stores PEM strings but not validation results, so TrustPin
 verification is performed on every request.</p>
 <h2 id="usage">Usage</h2>
 <pre class="language-dart"><code class="language-dart">final dio = Dio();
@@ -283,7 +283,7 @@ final response = await dio.get('https://api.example.com/data');
 <footer>
   <span class="no-break">
     trustpin_sdk
-      2.1.0
+      3.0.1
   </span>
   
 </footer>

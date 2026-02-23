@@ -71,10 +71,10 @@ void main() {
                   code: 'ERROR_FETCHING_PINNING_INFO',
                   message: 'Failed to fetch pinning information',
                 );
-              case 'jws-error.com':
+              case 'config-error.com':
                 throw PlatformException(
-                  code: 'JWS_VALIDATION_FAILED',
-                  message: 'JWS signature validation failed',
+                  code: 'CONFIGURATION_VALIDATION_FAILED',
+                  message: 'Configuration validation failed',
                 );
             }
             return null;
@@ -267,13 +267,13 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8...
         }
       });
 
-      test('should throw PlatformException for JWS validation failure', () async {
+      test('should throw PlatformException for configuration validation failure', () async {
         try {
-          await platform.verify('jws-error.com', validCertificate);
+          await platform.verify('config-error.com', validCertificate);
           fail('Expected PlatformException to be thrown');
         } on PlatformException catch (e) {
-          expect(e.code, equals('JWS_VALIDATION_FAILED'));
-          expect(e.message, contains('JWS signature validation failed'));
+          expect(e.code, equals('CONFIGURATION_VALIDATION_FAILED'));
+          expect(e.message, contains('Configuration validation failed'));
         }
       });
 

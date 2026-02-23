@@ -69,12 +69,6 @@ class TrustPinException implements Exception {
   /// their expiration date.
   bool get isAllPinsExpired => code == 'ALL_PINS_EXPIRED';
 
-  /// Returns true if JWS signature validation failed.
-  ///
-  /// This error occurs when the JWS signature of the pinning configuration
-  /// cannot be verified with the provided public key.
-  bool get isJwsValidationFailed => code == 'JWS_VALIDATION_FAILED';
-
   /// Returns true if domain is not registered (strict mode only).
   ///
   /// This error occurs in strict mode when attempting to validate a certificate
@@ -88,15 +82,4 @@ class TrustPinException implements Exception {
   bool get isConfigurationValidationFailed =>
       code == 'CONFIGURATION_VALIDATION_FAILED';
 
-  /// Returns true if standard TLS validation failed.
-  ///
-  /// This error occurs when the certificate fails standard TLS validation
-  /// (CA chain, expiry, hostname verification, etc.) before TrustPin verification.
-  bool get isTlsValidationFailed => code == 'TLS_VALIDATION_FAILED';
-
-  /// Returns true if TLS handshake failed.
-  ///
-  /// This error occurs when the TLS handshake process fails during
-  /// certificate validation.
-  bool get isTlsHandshakeFailed => code == 'TLS_HANDSHAKE_FAILED';
 }

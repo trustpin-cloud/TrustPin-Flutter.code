@@ -208,7 +208,7 @@ class TrustPinSDKPlugin: FlutterPlugin, MethodCallHandler {
       is TrustPinError.AllPinsExpired -> "ALL_PINS_EXPIRED"
       is TrustPinError.ConfigurationValidationFailed -> "CONFIGURATION_VALIDATION_FAILED"
       is TrustPinError.DomainNotRegistered -> "DOMAIN_NOT_REGISTERED"
-      else -> "UNKNOWN_ERROR"
+      else -> "INVALID_PROJECT_CONFIG"
     }
   }
 

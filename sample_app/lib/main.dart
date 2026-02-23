@@ -402,13 +402,13 @@ class _ContentViewState extends State<ContentView> {
       _logMessage("   Project ID: $projectId");
       _logMessage("   Public Key: ${publicKey.length > 20 ? '${publicKey.substring(0, 20)}...' : publicKey}");
 
-      await TrustPin.setLogLevel(TrustPinLogLevel.debug);
-      await TrustPin.setup(
+      await TrustPin.shared.setLogLevel(TrustPinLogLevel.debug);
+      await TrustPin.shared.setup(TrustPinConfiguration(
         organizationId: organizationId,
         projectId: projectId,
         publicKey: publicKey,
         mode: TrustPinMode.strict,
-      );
+      ));
 
       setState(() {
         _isConfigured = true;
@@ -442,7 +442,7 @@ class _ContentViewState extends State<ContentView> {
       final port = uri.hasPort ? uri.port : 443;
 
       _logMessage("Fetching certificate for $host:$port ...");
-      final pem = await TrustPin.fetchCertificate(host, port: port);
+      final pem = await TrustPin.shared.fetchCertificate(host, port: port);
 
       final derBytes = _pemToBytes(pem);
       final hash = sha256.convert(derBytes);

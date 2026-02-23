@@ -2,6 +2,10 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'trustpin_sdk_method_channel.dart';
 
+/// The platform interface for the TrustPin SDK plugin.
+///
+/// Platform-specific implementations should extend this class and override
+/// all methods. The default implementation uses [MethodChannelTrustPinSDK].
 abstract class TrustPinSDKPlatform extends PlatformInterface {
   /// Constructs a TrustPinSDKPlatform.
   TrustPinSDKPlatform() : super(token: _token);
@@ -23,25 +27,41 @@ abstract class TrustPinSDKPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  /// Initializes the TrustPin SDK with the given credentials.
+  ///
+  /// When [instanceId] is null, the global default instance is used.
+  /// When provided, a named instance is created or retrieved.
   Future<void> setup(
     String organizationId,
     String projectId,
     String publicKey, {
     Uri? configurationURL,
     String mode = 'strict',
+    String? instanceId,
   }) {
     throw UnimplementedError('setup() has not been implemented.');
   }
 
-  Future<void> verify(String domain, String certificate) {
+  /// Verifies a PEM certificate against configured pins for [domain].
+  ///
+  /// When [instanceId] is null, the global default instance is used.
+  Future<void> verify(String domain, String certificate,
+      {String? instanceId}) {
     throw UnimplementedError('verify() has not been implemented.');
   }
 
-  Future<void> setLogLevel(String logLevel) {
+  /// Sets the logging verbosity level.
+  ///
+  /// When [instanceId] is null, the global default instance is used.
+  Future<void> setLogLevel(String logLevel, {String? instanceId}) {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
 
-  Future<String> fetchCertificate(String host, {int port = 443}) {
+  /// Fetches the TLS leaf certificate from [host] as a PEM string.
+  ///
+  /// When [instanceId] is null, the global default instance is used.
+  Future<String> fetchCertificate(String host,
+      {int port = 443, String? instanceId}) {
     throw UnimplementedError('fetchCertificate() has not been implemented.');
   }
 }

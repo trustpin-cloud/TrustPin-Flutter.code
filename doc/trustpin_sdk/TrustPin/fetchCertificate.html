@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the clearCertificateCache method from the TrustPinHttpClient class, for the Dart programming language.">
-  <title>clearCertificateCache method - TrustPinHttpClient class - http_client_interceptor library - Dart API</title>
+  <meta name="description" content="API docs for the fetchCertificate method from the TrustPin class, for the Dart programming language.">
+  <title>fetchCertificate method - TrustPin class - trustpin_sdk library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">trustpin_sdk</a></li>
-    <li><a href="../../http_interceptors_http_client_interceptor/">http_interceptors&#47;http_client_interceptor.dart</a></li>
-    <li><a href="../../http_interceptors_http_client_interceptor/TrustPinHttpClient-class.html">TrustPinHttpClient</a></li>
-    <li class="self-crumb">clearCertificateCache method</li>
+    <li><a href="../../trustpin_sdk/">trustpin_sdk.dart</a></li>
+    <li><a href="../../trustpin_sdk/TrustPin-class.html">TrustPin</a></li>
+    <li class="self-crumb">fetchCertificate static method</li>
   </ol>
-  <div class="self-name">clearCertificateCache</div>
+  <div class="self-name">fetchCertificate</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,33 +46,64 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="http_interceptors_http_client_interceptor&#47;TrustPinHttpClient-class-sidebar.html"
+    data-above-sidebar="trustpin_sdk&#47;TrustPin-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">clearCertificateCache</span> method 
+<h1><span class="kind-method">fetchCertificate</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype">void</span>
-<span class="name ">clearCertificateCache</span>(<wbr>)
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+<span class="name ">fetchCertificate</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="fetchCertificate-param-host"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">host</span>, {</span></li>
+<li><span class="parameter" id="fetchCertificate-param-port"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">port</span> = <span class="default-value">443</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Clears the certificate cache.</p>
-<p>Call this method if you want to force fetching fresh certificates
-for all hosts on the next request.</p>
+  <p>Fetches the TLS leaf certificate from a host as a PEM string.</p>
+<p>Opens an ephemeral side-channel TLS connection, performs OS-level chain
+validation, extracts the leaf certificate, and immediately cancels the
+connection without sending any HTTP data.</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre class="language-dart"><code class="language-dart">try {
+  final pem = await TrustPin.fetchCertificate('api.example.com');
+  await TrustPin.verify('api.example.com', pem);
+  print('Certificate is valid!');
+} on TrustPinException catch (e) {
+  print('Failed: $e');
+}
+</code></pre>
+<ul>
+<li>
+<p>Parameter <code>host</code>: Hostname to connect to (e.g. "api.example.com").</p>
+</li>
+<li>
+<p>Parameter <code>port</code>: TCP port (default: 443).</p>
+</li>
+<li>
+<p>Returns: PEM-encoded leaf certificate string.</p>
+</li>
+<li>
+<p>Throws <a href="../../trustpin_exception/TrustPinException-class.html">TrustPinException</a> with code <code>INVALID_SERVER_CERT</code> if the TLS handshake fails.</p>
+</li>
+</ul>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void clearCertificateCache() {
-  _certificateCache.clear();
+  <pre class="language-dart"><code class="language-dart">static Future&lt;String&gt; fetchCertificate(String host, {int port = 443}) async {
+  try {
+    return await TrustPinSDKPlatform.instance
+        .fetchCertificate(host, port: port);
+  } catch (e) {
+    throw TrustPinException.fromPlatformException(e);
+  }
 }</code></pre>
 </section>
 
@@ -87,12 +118,12 @@ for all hosts on the next request.</p>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">trustpin_sdk</a></li>
-    <li><a href="../../http_interceptors_http_client_interceptor/">http_client_interceptor</a></li>
-    <li><a href="../../http_interceptors_http_client_interceptor/TrustPinHttpClient-class.html">TrustPinHttpClient</a></li>
-    <li class="self-crumb">clearCertificateCache method</li>
+    <li><a href="../../trustpin_sdk/">trustpin_sdk</a></li>
+    <li><a href="../../trustpin_sdk/TrustPin-class.html">TrustPin</a></li>
+    <li class="self-crumb">fetchCertificate static method</li>
 </ol>
 
-    <h5>TrustPinHttpClient class</h5>
+    <h5>TrustPin class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

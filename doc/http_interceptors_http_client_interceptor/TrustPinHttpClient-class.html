@@ -57,9 +57,10 @@
   <p>A certificate pinning interceptor for the http package.</p>
 <p>This interceptor wraps any http.Client and adds TrustPin certificate
 validation to all HTTPS requests. It first ensures the certificate passes
-standard TLS validation, then performs additional TrustPin verification.</p>
-<p>Certificates are cached to avoid repeated socket connections to the same
-host. The cache stores certificates but not validation results, so TrustPin
+standard TLS validation (via <a href="../trustpin_sdk/TrustPin/fetchCertificate.html">TrustPin.fetchCertificate</a>), then performs
+additional TrustPin verification.</p>
+<p>Certificates are cached to avoid repeated TLS connections to the same
+host. The cache stores PEM strings but not validation results, so TrustPin
 verification is performed on every request.</p>
 </section>
 
@@ -370,7 +371,7 @@ bytes.
 <footer>
   <span class="no-break">
     trustpin_sdk
-      2.1.0
+      3.0.1
   </span>
   
 </footer>

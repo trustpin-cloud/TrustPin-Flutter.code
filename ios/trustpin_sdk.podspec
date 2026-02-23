@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = 'trustpin_sdk'
-  spec.version          = '3.1.2'
+  spec.version          = '3.0.1'
   spec.summary          = 'Flutter plugin for TrustPin SSL certificate pinning SDK'
   spec.description      = <<-DESC
 Flutter plugin for TrustPin SSL certificate pinning SDK providing secure certificate validation.

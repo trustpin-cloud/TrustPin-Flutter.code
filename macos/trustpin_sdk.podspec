@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = 'trustpin_sdk'
-  spec.version          = '3.1.2'
+  spec.version          = '3.0.1'
   spec.summary          = 'Flutter plugin for TrustPin SSL certificate pinning SDK'
   spec.description      = <<-DESC
 Flutter plugin for TrustPin SSL certificate pinning SDK providing secure certificate validation.
@@ -19,5 +19,5 @@ Flutter plugin for TrustPin SSL certificate pinning SDK providing secure certifi
   spec.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   spec.swift_version = "6.1"
 
-  spec.framework = "Foundation"
+  spec.frameworks = "Foundation", "Security"
 end

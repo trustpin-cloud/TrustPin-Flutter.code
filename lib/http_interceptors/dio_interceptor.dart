@@ -25,18 +25,23 @@ import '../trustpin_sdk.dart';
 ///
 /// ## Important Notes
 ///
-/// - TrustPin must be initialized with [TrustPin.setup] before using this interceptor
+/// - The TrustPin instance must be initialized with [TrustPin.setup] before using this interceptor
 /// - Only HTTPS requests are validated; HTTP requests pass through unchanged
 /// - Certificate validation happens before the actual HTTP request is sent
 /// - Failed validation prevents the request from being sent
 class TrustPinDioInterceptor extends Interceptor {
   final Map<String, String> _certificateCache = {};
+  final TrustPin _instance;
 
   /// Creates a new TrustPinDioInterceptor.
   ///
-  /// TrustPin must be properly configured with [TrustPin.setup] before
-  /// making requests with this interceptor.
-  TrustPinDioInterceptor();
+  /// When [instance] is provided, the interceptor uses that TrustPin instance
+  /// for certificate validation. When null, [TrustPin.shared] is used.
+  ///
+  /// The TrustPin instance must be properly configured with [TrustPin.setup]
+  /// before making requests with this interceptor.
+  TrustPinDioInterceptor({TrustPin? instance})
+      : _instance = instance ?? TrustPin.shared;
 
   @override
   void onRequest(
@@ -85,11 +90,11 @@ class TrustPinDioInterceptor extends Interceptor {
     var pemCert = _certificateCache[cacheKey];
     if (pemCert == null) {
       // Fetch the leaf certificate via native OS-level TLS validation
-      pemCert = await TrustPin.fetchCertificate(host, port: port);
+      pemCert = await _instance.fetchCertificate(host, port: port);
       _certificateCache[cacheKey] = pemCert;
     }
 
-    await TrustPin.verify(host, pemCert);
+    await _instance.verify(host, pemCert);
   }
 
   /// Clears the certificate cache.

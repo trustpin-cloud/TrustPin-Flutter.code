@@ -69,10 +69,10 @@ void main() {
                   code: 'ERROR_FETCHING_PINNING_INFO',
                   message: 'Failed to fetch pinning information',
                 );
-              case 'jws-error.example.com':
+              case 'config-error.example.com':
                 throw PlatformException(
-                  code: 'JWS_VALIDATION_FAILED',
-                  message: 'JWS signature validation failed',
+                  code: 'CONFIGURATION_VALIDATION_FAILED',
+                  message: 'Configuration validation failed',
                 );
               default:
                 // Successful validation
@@ -259,10 +259,8 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8MOCK_DATA==
           'DOMAIN_NOT_REGISTERED',
           'ALL_PINS_EXPIRED',
           'ERROR_FETCHING_PINNING_INFO',
-          'JWS_VALIDATION_FAILED',
+          'CONFIGURATION_VALIDATION_FAILED',
           'INVALID_SERVER_CERT',
-          'TLS_VALIDATION_FAILED',
-          'TLS_HANDSHAKE_FAILED',
           'NO_CERTIFICATE',
         ];
 

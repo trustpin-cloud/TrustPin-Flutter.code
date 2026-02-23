@@ -14,22 +14,29 @@ import '../trustpin_sdk.dart';
 /// verification is performed on every request.
 class TrustPinHttpClient extends http.BaseClient {
   final http.Client _inner;
+  final TrustPin _instance;
   final Map<String, String> _certificateCache = {};
 
   /// Creates a new TrustPinHttpClient that wraps the provided client.
   ///
-  /// The [inner] client will be used for making actual HTTP requests after
-  /// certificate validation passes. TrustPin must be properly configured
-  /// with [TrustPin.setup] before making requests.
-  TrustPinHttpClient(this._inner);
+  /// The provided client will be used for making actual HTTP requests after
+  /// certificate validation passes. When [instance] is provided, the client
+  /// uses that TrustPin instance. When null, [TrustPin.shared] is used.
+  ///
+  /// The TrustPin instance must be properly configured with [TrustPin.setup]
+  /// before making requests.
+  TrustPinHttpClient(this._inner, {TrustPin? instance})
+      : _instance = instance ?? TrustPin.shared;
 
   /// Creates a TrustPinHttpClient with a default http.Client.
   ///
-  /// This is a convenience constructor that creates a standard http.Client
-  /// internally. TrustPin must be properly configured with [TrustPin.setup]
+  /// When [instance] is provided, the client uses that TrustPin instance.
+  /// When null, [TrustPin.shared] is used.
+  ///
+  /// The TrustPin instance must be properly configured with [TrustPin.setup]
   /// before making requests.
-  factory TrustPinHttpClient.create() {
-    return TrustPinHttpClient(http.Client());
+  factory TrustPinHttpClient.create({TrustPin? instance}) {
+    return TrustPinHttpClient(http.Client(), instance: instance);
   }
 
   @override
@@ -51,11 +58,11 @@ class TrustPinHttpClient extends http.BaseClient {
     var pemCert = _certificateCache[cacheKey];
     if (pemCert == null) {
       // Fetch the leaf certificate via native OS-level TLS validation
-      pemCert = await TrustPin.fetchCertificate(host, port: port);
+      pemCert = await _instance.fetchCertificate(host, port: port);
       _certificateCache[cacheKey] = pemCert;
     }
 
-    await TrustPin.verify(host, pemCert);
+    await _instance.verify(host, pemCert);
   }
 
   /// Clears the certificate cache.

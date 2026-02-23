@@ -67,10 +67,10 @@ void main() {
                   code: 'ERROR_FETCHING_PINNING_INFO',
                   message: 'Failed to fetch pinning information',
                 );
-              case 'jws-error.example.com':
+              case 'config-error.example.com':
                 throw PlatformException(
-                  code: 'JWS_VALIDATION_FAILED',
-                  message: 'JWS signature validation failed',
+                  code: 'CONFIGURATION_VALIDATION_FAILED',
+                  message: 'Configuration validation failed',
                 );
               default:
                 // Successful validation
@@ -257,14 +257,13 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8MOCK_DATA==
     group('Error Handling', () {
       test('should handle TrustPinException scenarios', () {
         final errorCodes = [
-          'TLS_VALIDATION_FAILED',
-          'TLS_HANDSHAKE_FAILED',
-          'PINS_MISMATCH',
-          'DOMAIN_NOT_REGISTERED',
-          'ALL_PINS_EXPIRED',
+          'INVALID_PROJECT_CONFIG',
           'ERROR_FETCHING_PINNING_INFO',
-          'JWS_VALIDATION_FAILED',
           'INVALID_SERVER_CERT',
+          'PINS_MISMATCH',
+          'ALL_PINS_EXPIRED',
+          'DOMAIN_NOT_REGISTERED',
+          'CONFIGURATION_VALIDATION_FAILED',
         ];
 
         for (final code in errorCodes) {
@@ -278,12 +277,12 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7Q1jx8MOCK_DATA==
       });
 
       test('should create proper error messages', () {
-        const testMessage = 'Certificate failed standard TLS validation: Connection refused';
-        final error = TrustPinException('TLS_VALIDATION_FAILED', testMessage);
-        
-        expect(error.code, equals('TLS_VALIDATION_FAILED'));
+        const testMessage = 'Certificate does not match any configured pins';
+        final error = TrustPinException('PINS_MISMATCH', testMessage);
+
+        expect(error.code, equals('PINS_MISMATCH'));
         expect(error.message, equals(testMessage));
-        expect(error.toString(), contains('TLS_VALIDATION_FAILED'));
+        expect(error.toString(), contains('PINS_MISMATCH'));
         expect(error.toString(), contains(testMessage));
       });
     });
