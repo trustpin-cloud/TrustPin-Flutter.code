@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "trustpin-sdk", targets: ["trustpin_sdk"])
     ],
     dependencies: [
-        .package(url: "https://github.com/trustpin-cloud/TrustPin-Swift.binary", from: "3.1.2")
+        .package(url: "https://github.com/trustpin-cloud/TrustPin-Swift.binary", from: "3.3.0")
     ],
     targets: [
         .target(
