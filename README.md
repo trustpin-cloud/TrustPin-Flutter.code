@@ -304,7 +304,7 @@ await TrustPin.shared.setLogLevel(TrustPinLogLevel.none);
 | `TrustPinDioInterceptor({instance?})` | Certificate pinning interceptor for Dio |
 | `TrustPinHttpClient({instance?})` | Certificate pinning wrapper for http.Client |
 
-Full API documentation: [trustpin-cloud.github.io/TrustPin-Flutter.code](https://trustpin-cloud.github.io/TrustPin-Flutter.code/trustpin_sdk/)
+Full API documentation: [trustpin-cloud.github.io/TrustPin-Flutter.code](https://trustpin-cloud.github.io/TrustPin-Flutter.code/)
 
 ## Error Handling
 
