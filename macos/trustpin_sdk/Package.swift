@@ -12,13 +12,13 @@ let package = Package(
         .library(name: "trustpin-sdk", targets: ["trustpin_sdk"])
     ],
     dependencies: [
-        .package(url: "https://github.com/trustpin-cloud/TrustPin-Swift.binary", from: "3.3.0")
+        .package(url: "https://github.com/trustpin-cloud/swift.sdk", from: "4.0.0")
     ],
     targets: [
         .target(
             name: "trustpin_sdk",
             dependencies: [
-                .product(name: "TrustPinKit", package: "TrustPin-Swift.binary")
+                .product(name: "TrustPinKit", package: "swift.sdk")
             ],
             resources: [
                 .process("Resources/PrivacyInfo.xcprivacy")

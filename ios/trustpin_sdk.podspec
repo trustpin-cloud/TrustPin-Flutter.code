@@ -1,17 +1,17 @@
 Pod::Spec.new do |spec|
   spec.name             = 'trustpin_sdk'
-  spec.version          = '3.3.0'
+  spec.version          = '4.0.0'
   spec.summary          = 'Flutter plugin for TrustPin SSL certificate pinning SDK'
   spec.description      = <<-DESC
 Flutter plugin for TrustPin SSL certificate pinning SDK providing secure certificate validation.
                        DESC
-  spec.homepage         = 'https://github.com/trustpin-cloud/TrustPin-Flutter'
+  spec.homepage         = 'https://github.com/trustpin-cloud/flutter.sdk'
   spec.license          = { :file => '../LICENSE' }
   spec.author           = { 'TrustPin' => 'support@trustpin.cloud' }
-  spec.source           = { :git => 'https://github.com/trustpin-cloud/TrustPin-flutter.code' }
+  spec.source           = { :git => 'https://github.com/trustpin-cloud/flutter.sdk' }
   spec.source_files = 'trustpin_sdk/Sources/trustpin_sdk/**/*.swift'
   spec.dependency 'Flutter'
-  spec.dependency 'TrustPinKit', '3.3.0'
+  spec.dependency 'TrustPinKit', '4.0.0'
 
   spec.ios.deployment_target = "13.0"
   spec.osx.deployment_target = "13.0"
@@ -25,6 +25,6 @@ Flutter plugin for TrustPin SSL certificate pinning SDK providing secure certifi
 
   spec.frameworks = "Foundation", "Security"
 
-  spec.documentation_url = 'https://trustpin-cloud.github.io/TrustPin-Flutter.code'
+  spec.documentation_url = 'https://trustpin-cloud.github.io/flutter.sdk'
   spec.social_media_url = 'https://trustpin.cloud'
 end

@@ -1,7 +1,7 @@
 # TrustPin SDK for Flutter
 
 [![pub package](https://img.shields.io/pub/v/trustpin_sdk.svg)](https://pub.dev/packages/trustpin_sdk)
-[![documentation](https://img.shields.io/badge/documentation-GitHub%20Pages-blue)](https://trustpin-cloud.github.io/TrustPin-Flutter.code/)
+[![documentation](https://img.shields.io/badge/documentation-GitHub%20Pages-blue)](https://trustpin-cloud.github.io/flutter.sdk/)
 [![platform](https://img.shields.io/badge/platform-flutter-blue)](https://flutter.dev)
 [![platform](https://img.shields.io/badge/platform-dart-blue)](https://dart.dev)
 
@@ -304,7 +304,7 @@ await TrustPin.shared.setLogLevel(TrustPinLogLevel.none);
 | `TrustPinDioInterceptor({instance?})` | Certificate pinning interceptor for Dio |
 | `TrustPinHttpClient({instance?})` | Certificate pinning wrapper for http.Client |
 
-Full API documentation: [trustpin-cloud.github.io/TrustPin-Flutter.code](https://trustpin-cloud.github.io/TrustPin-Flutter.code/)
+Full API documentation: [trustpin-cloud.github.io/flutter.sdk](https://trustpin-cloud.github.io/flutter.sdk/)
 
 ## Error Handling
 
@@ -357,7 +357,7 @@ flutter run
 
 **Secure your Flutter apps with TrustPin SSL Certificate Pinning**
 
-[Get Started](https://app.trustpin.cloud) | [Documentation](https://trustpin-cloud.github.io/TrustPin-Flutter.code/) | [Support](mailto:support@trustpin.cloud)
+[Get Started](https://app.trustpin.cloud) | [Documentation](https://trustpin-cloud.github.io/flutter.sdk/) | [Support](mailto:support@trustpin.cloud)
 
 </div>
 

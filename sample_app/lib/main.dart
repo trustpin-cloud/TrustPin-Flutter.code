@@ -521,7 +521,7 @@ class _ContentViewState extends State<ContentView> {
     _logMessage("📡 Making HTTP request...");
     _logMessage("   Method: GET");
     _logMessage("   URL: $uri");
-    _logMessage("   User-Agent: TrustPin-Flutter-Sample/1.0");
+    _logMessage("   User-Agent: flutter.sdk-Sample/1.0");
 
     // Create TrustPinHttpClient for automatic certificate pinning
     final httpClient = TrustPinHttpClient.create();
@@ -532,7 +532,7 @@ class _ContentViewState extends State<ContentView> {
       final response = await httpClient.get(
         uri,
         headers: {
-          'User-Agent': 'TrustPin-Flutter-Sample/1.0',
+          'User-Agent': 'flutter.sdk-Sample/1.0',
         },
       );
       
